@@ -1,8 +1,6 @@
-const API_URL = 'http://localhost:5000/api';
+// Use Netlify Functions for API calls
+const API_URL = '/api';
 
-if (!isLocal && API_URL.includes('your-backend-url')) {
-    console.warn('WARNING: You are on a deployed site but the Backend URL is not set. Login will likely fail.');
-}
 
 async function fetchAPI(endpoint, method = 'GET', body = null) {
     const token = localStorage.getItem('token');
