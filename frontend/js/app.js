@@ -1,22 +1,60 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Auth Check
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user'));
+    // Auto-Login / Auth Check
+    const checkAuth = async () => {
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user'));
 
-    if (!token || !user) {
-        window.location.href = 'index.html';
-        return;
-    }
+        if (!token || !user) {
+            console.log('No session found. Auto-logging in as Admin...');
+            try {
+                // Hardcoded Admin Creds for Auto-Login
+                const res = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@ace.com', password: 'password123' })
+                });
 
-    // Set User Info
-    document.getElementById('user-name').textContent = user.name;
-    document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+                const data = await res.json();
 
-    // Profile Init
-    if (document.getElementById('profile-name')) {
-        document.getElementById('profile-name').value = user.name;
-        document.getElementById('profile-email').value = user.email;
-    }
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    token = data.token;
+                    user = data.user;
+                } else {
+                    throw new Error('Auto-login failed');
+                }
+            } catch (err) {
+                console.error(err);
+                if (window.location.protocol === 'https:') {
+                    alert('Demo Error: Cannot connect to Localhost from https://vercel.app (Mixed Content).\nPlease run this project LOCALLY.');
+                } else {
+                    alert('Backend is offline. Please run "npm run dev" in the backend folder.');
+                }
+                return;
+            }
+        }
+
+        // Set User Info UI
+        if (user) {
+            document.getElementById('user-name').textContent = user.name;
+            document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+            // Profile Init
+            if (document.getElementById('profile-name')) {
+                document.getElementById('profile-name').value = user.name;
+                document.getElementById('profile-email').value = user.email;
+            }
+        }
+
+        // Load Data
+        loadLeads();
+        if (document.getElementById('view-activities') && document.getElementById('view-activities').style.display !== 'none') {
+            loadActivities();
+        }
+    };
+
+    checkAuth();
 
     // Header Profile Click
     document.querySelector('.user-profile').style.cursor = 'pointer';
@@ -149,9 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-
-    // Initial Load
-    loadLeads();
 
     // Form Submit
     leadForm.addEventListener('submit', async (e) => {
