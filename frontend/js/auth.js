@@ -16,34 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
 
             try {
-                // Determine API URL based on environment
-                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                // Note: User must update this for production
-                const API_URL = isLocal ? 'http://localhost:5000/api/auth/login' : 'https://your-backend.onrender.com/api/auth/login';
-
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
+                const data = await fetchAPI('/auth/login', 'POST', { email, password });
 
                 if (data.success) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
-                } else {
-                    alert(data.error || 'Login failed');
                 }
             } catch (err) {
                 console.error(err);
                 if (window.location.protocol === 'https:' && err.message.includes('Failed to fetch')) {
-                    alert('Login Failed: Mixed Content Error.\n\nYour frontend is on HTTPS (Vercel) but backend is on HTTP (Localhost).\n\nPlease run the project LOCALLY (open index.html on your PC) to test it.');
+                    alert('Deployment Error: Your Frontend is online (Vercel) but Backend is offline (Localhost).\n\nTO SHARE THIS APP:\n1. Deploy the "backend" folder to Render.com.\n2. Update "frontend/js/api.js" with the new Render URL.');
                 } else {
-                    alert('Login failed. Backend connection refused.\nMake sure the server is running on port 5000.');
+                    alert(err.message || 'Login failed');
                 }
             }
         });
