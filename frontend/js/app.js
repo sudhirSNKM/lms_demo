@@ -8,6 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // Explicitly show dashboard view first
+    document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
+    const dashboardView = document.getElementById('view-dashboard');
+    if (dashboardView) dashboardView.style.display = 'block';
+
+    // Update nav state
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector('.nav-item').classList.add('active');
+
     // Set User Info UI
     document.getElementById('user-name').textContent = user.name;
     document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
