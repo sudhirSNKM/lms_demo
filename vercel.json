@@ -1,0 +1,17 @@
+{
+    "version": 2,
+    "rewrites": [
+        {
+            "source": "/",
+            "destination": "/frontend/index.html"
+        },
+        {
+            "source": "/css/:match*",
+            "destination": "/frontend/css/:match*"
+        },
+        {
+            "source": "/js/:match*",
+            "destination": "/frontend/js/:match*"
+        }
+    ]
+}
