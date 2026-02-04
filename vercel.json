@@ -6,6 +6,18 @@
             "destination": "/frontend/index.html"
         },
         {
+            "source": "/index.html",
+            "destination": "/frontend/index.html"
+        },
+        {
+            "source": "/dashboard.html",
+            "destination": "/frontend/dashboard.html"
+        },
+        {
+            "source": "/login.html",
+            "destination": "/frontend/login.html"
+        },
+        {
             "source": "/css/:match*",
             "destination": "/frontend/css/:match*"
         },
