@@ -1,29 +1,46 @@
-const Activity = require('../models/Activity');
+// Import activity store from leads controller
+let activityStore = [];
 
-// @desc    Get recent activities
+// @desc    Get all activities
 // @route   GET /api/activities
 // @access  Private
 exports.getActivities = async (req, res, next) => {
     try {
-        const activities = await Activity.find();
-        // Sort by date desc manually since it's JSON array
-        activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        res.status(200).json({ success: true, count: activities.length, data: activities.slice(0, 20) });
+        // Get activities from leads controller if available
+        const leadsController = require('./leads');
+        if (leadsController.activityStore) {
+            activityStore = leadsController.activityStore;
+        }
+
+        // Sort by most recent first
+        const sortedActivities = activityStore.sort((a, b) =>
+            new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        res.status(200).json({
+            success: true,
+            count: sortedActivities.length,
+            data: sortedActivities.slice(0, 50) // Limit to 50 most recent
+        });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
 };
 
-// Helper to log activity
+// Helper function to log activities
 exports.logActivity = async (action, description, user) => {
     try {
-        await Activity.create({
+        const activity = {
+            _id: 'activity_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             action,
             description,
-            user: user,
-            createdAt: new Date().toISOString()
-        });
+            user,
+            createdAt: new Date()
+        };
+
+        activityStore.push(activity);
+        return activity;
     } catch (err) {
-        console.error('Activity Log Error:', err);
+        console.error('Error logging activity:', err);
     }
 };

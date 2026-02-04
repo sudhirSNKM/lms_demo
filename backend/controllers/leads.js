@@ -1,13 +1,18 @@
-const Lead = require('../models/Lead');
-const { logActivity } = require('./activities');
+// In-memory storage for demo mode
+let leadsStore = [];
+let activityStore = [];
+
+// Helper to generate ID
+const generateId = () => {
+    return 'lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+};
 
 // @desc    Get all leads
 // @route   GET /api/leads
 // @access  Private
 exports.getLeads = async (req, res, next) => {
     try {
-        const leads = await Lead.find();
-        res.status(200).json({ success: true, count: leads.length, data: leads });
+        res.status(200).json({ success: true, count: leadsStore.length, data: leadsStore });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -18,7 +23,7 @@ exports.getLeads = async (req, res, next) => {
 // @access  Private
 exports.getLead = async (req, res, next) => {
     try {
-        const lead = await Lead.findById(req.params.id);
+        const lead = leadsStore.find(l => l._id === req.params.id);
 
         if (!lead) {
             return res.status(404).json({ success: false, error: 'Lead not found' });
@@ -35,8 +40,23 @@ exports.getLead = async (req, res, next) => {
 // @access  Private
 exports.createLead = async (req, res, next) => {
     try {
-        const lead = await Lead.create(req.body);
-        await logActivity('Create Lead', `Created new lead: ${lead.name}`, req.user.name);
+        const lead = {
+            _id: generateId(),
+            ...req.body,
+            createdAt: new Date()
+        };
+
+        leadsStore.push(lead);
+
+        // Log activity
+        activityStore.push({
+            _id: generateId(),
+            action: 'Create Lead',
+            description: `Created new lead: ${lead.name}`,
+            user: req.user.name,
+            createdAt: new Date()
+        });
+
         res.status(201).json({ success: true, data: lead });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
@@ -48,20 +68,27 @@ exports.createLead = async (req, res, next) => {
 // @access  Private
 exports.updateLead = async (req, res, next) => {
     try {
-        let lead = await Lead.findById(req.params.id);
+        const index = leadsStore.findIndex(l => l._id === req.params.id);
 
-        if (!lead) {
+        if (index === -1) {
             return res.status(404).json({ success: false, error: 'Lead not found' });
         }
 
-        lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
+        leadsStore[index] = {
+            ...leadsStore[index],
+            ...req.body
+        };
+
+        // Log activity
+        activityStore.push({
+            _id: generateId(),
+            action: 'Update Lead',
+            description: `Updated lead: ${leadsStore[index].name}`,
+            user: req.user.name,
+            createdAt: new Date()
         });
 
-        await logActivity('Update Lead', `Updated status: ${lead.name}`, req.user.name);
-
-        res.status(200).json({ success: true, data: lead });
+        res.status(200).json({ success: true, data: leadsStore[index] });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -72,17 +99,29 @@ exports.updateLead = async (req, res, next) => {
 // @access  Private
 exports.deleteLead = async (req, res, next) => {
     try {
-        const lead = await Lead.findById(req.params.id);
+        const index = leadsStore.findIndex(l => l._id === req.params.id);
 
-        if (!lead) {
+        if (index === -1) {
             return res.status(404).json({ success: false, error: 'Lead not found' });
         }
 
-        await lead.deleteOne();
-        await logActivity('Delete Lead', `Deleted lead: ${lead.name}`, req.user.name);
+        const deletedLead = leadsStore[index];
+        leadsStore.splice(index, 1);
+
+        // Log activity
+        activityStore.push({
+            _id: generateId(),
+            action: 'Delete Lead',
+            description: `Deleted lead: ${deletedLead.name}`,
+            user: req.user.name,
+            createdAt: new Date()
+        });
 
         res.status(200).json({ success: true, data: {} });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
 };
+
+// Export stores for activities controller
+exports.activityStore = activityStore;
