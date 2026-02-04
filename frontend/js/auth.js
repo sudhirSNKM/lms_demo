@@ -33,7 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error(err);
-                alert('Login failed. Please check backend connection.');
+                if (window.location.protocol === 'https:' && err.message.includes('Failed to fetch')) {
+                    alert('Login Failed: Mixed Content Error.\n\nYour frontend is on HTTPS (Vercel) but backend is on HTTP (Localhost).\n\nPlease run the project LOCALLY (open index.html on your PC) to test it.');
+                } else {
+                    alert('Login failed. Backend connection refused.\nMake sure the server is running on port 5000.');
+                }
             }
         });
     }
