@@ -1,43 +1,99 @@
-const API_URL = 'http://localhost:5000/api';
+// MOCK API ADAPTER for Frontend-Only Demo
+// This replaces the real backend with localStorage simulation
 
+const MOCK_DELAY = 300; // ms
 
 async function fetchAPI(endpoint, method = 'GET', body = null) {
-    const token = localStorage.getItem('token');
+    console.log(`[MOCK API] ${method} ${endpoint}`, body);
 
-    const headers = {
-        'Content-Type': 'application/json'
-    };
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            try {
+                let response = { success: true, data: null };
 
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
+                // === AUTH ===
+                if (endpoint.includes('/auth/login') || endpoint.includes('/auth/register')) {
+                    // Accept any login
+                    response.data = {
+                        token: 'mock-token-' + Date.now(),
+                        user: { name: 'Demo User', email: body?.email || 'admin@ace.com', role: 'admin' }
+                    };
+                }
 
-    const config = {
-        method,
-        headers,
-    };
+                // === LEADS ===
+                else if (endpoint === '/leads') {
+                    if (method === 'GET') {
+                        const leads = getLeads();
+                        response.data = leads;
+                    } else if (method === 'POST') {
+                        const newLead = { ...body, _id: 'lead-' + Date.now(), createdAt: new Date() };
+                        const leads = getLeads();
+                        leads.unshift(newLead);
+                        saveLeads(leads);
+                        response.data = newLead;
+                    }
+                }
+                else if (endpoint.startsWith('/leads/')) {
+                    const id = endpoint.split('/')[2];
+                    const leads = getLeads();
 
-    if (body) {
-        config.body = JSON.stringify(body);
-    }
+                    if (method === 'DELETE') {
+                        const filtered = leads.filter(l => l._id !== id);
+                        saveLeads(filtered);
+                        response.data = { message: 'Deleted' };
+                    } else if (method === 'PUT') {
+                        const index = leads.findIndex(l => l._id === id);
+                        if (index !== -1) {
+                            leads[index] = { ...leads[index], ...body };
+                            saveLeads(leads);
+                            response.data = leads[index];
+                        }
+                    } else if (method === 'GET') {
+                        response.data = leads.find(l => l._id === id);
+                    }
+                }
 
-    try {
-        const response = await fetch(`${API_URL}${endpoint}`, config);
-        const data = await response.json();
+                // === ACTIVITIES ===
+                else if (endpoint === '/activities') {
+                    // Return mock activities
+                    response.data = [
+                        { action: 'Lead Created', description: 'New lead "John Smith" added', createdAt: new Date(), user: 'Demo User' },
+                        { action: 'Email Sent', description: 'AI Follow-up sent to "TechCorp"', createdAt: new Date(Date.now() - 3600000), user: 'System' },
+                        { action: 'Status Update', description: 'Moved "Design Studio" to Qualified', createdAt: new Date(Date.now() - 86400000), user: 'Demo User' }
+                    ];
+                }
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                // Token expired or invalid
-                localStorage.removeItem('token');
-                window.location.href = 'index.html';
-                throw new Error('Unauthorized');
+                // === PROFILE ===
+                else if (endpoint.includes('/auth/update')) {
+                    response.data = body; // Echo back
+                }
+
+                resolve(response);
+            } catch (err) {
+                console.error('Mock API Error', err);
+                reject(err);
             }
-            throw new Error(data.error || 'Something went wrong');
-        }
+        }, MOCK_DELAY);
+    });
+}
 
-        return data;
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
-    }
+// Helper to get leads from storage or init default
+function getLeads() {
+    const stored = localStorage.getItem('ace_leads');
+    if (stored) return JSON.parse(stored);
+
+    // Default Mock Data
+    const defaults = [
+        { _id: '1', name: 'Sarah Miller', company: 'TechFlow Inc', email: 'sarah@techflow.com', phone: '555-0123', status: 'New', priority: 'Hot' },
+        { _id: '2', name: 'James Wilson', company: 'Design & Co', email: 'j.wilson@design.co', phone: '555-0124', status: 'Contacted', priority: 'Warm' },
+        { _id: '3', name: 'Robert Chen', company: 'Growth AI', email: 'robert@growthai.io', phone: '555-0125', status: 'Qualified', priority: 'Hot' },
+        { _id: '4', name: 'Emily Davis', company: 'SoftSystems', email: 'emily@soft.sys', phone: '555-0126', status: 'Won', priority: 'Cold' },
+        { _id: '5', name: 'Michael Brown', company: 'LogiTech', email: 'mbrown@logi.tech', phone: '555-0127', status: 'Lost', priority: 'Warm' }
+    ];
+    saveLeads(defaults);
+    return defaults;
+}
+
+function saveLeads(leads) {
+    localStorage.setItem('ace_leads', JSON.stringify(leads));
 }
