@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACE | Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar glass">
+            <div class="sidebar-title">ACE LEADS</div>
+            <nav>
+                <div class="nav-item active">Dashboard</div>
+                <div class="nav-item">Pipeline</div>
+                <div class="nav-item">Activities</div>
+                <div class="nav-item">Reports</div>
+                <div id="logout-btn" class="nav-item" style="color: var(--danger-color); margin-top: auto;">Logout</div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h2>Dashboard Overview</h2>
+                <div class="user-profile">
+                    <span id="user-name">Loading...</span>
+                    <div class="avatar" id="user-avatar">A</div>
+                </div>
+            </header>
+
+            <!-- Leads Management (Default View) -->
+            <div id="view-dashboard" class="view-section">
+                <!-- KPI Cards -->
+                <div class="stats-grid">
+                    <div class="glass-card">
+                        <div class="stat-label">Total Leads</div>
+                        <div class="stat-value" id="total-leads" style="color: var(--primary-color)">0</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">New Leads</div>
+                        <div class="stat-value" id="new-leads" style="color: #60a5fa">0</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Hot Leads</div>
+                        <div class="stat-value" id="hot-leads" style="color: var(--danger-color)">0</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Conversion Rate</div>
+                        <div class="stat-value" style="color: var(--success-color)">12.5%</div>
+                    </div>
+                </div>
+
+                <div class="leads-section glass-card">
+                    <div class="section-header">
+                        <h3>Leads Directory</h3>
+                        <div style="display: flex; gap: 1rem;">
+                            <input type="text" id="search-leads" placeholder="Search leads..." class="form-input"
+                                style="width: 200px; padding: 0.5rem;">
+                            <button class="add-btn" id="open-modal-btn">+ New Lead</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>AI Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-table-body">
+                            <!-- Leads will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pipeline View -->
+            <div id="view-pipeline" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Lead Pipeline</h3>
+                <div class="pipeline-container"
+                    style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;">
+                    <!-- Pipeline Columns injected by JS -->
+                </div>
+            </div>
+
+            <!-- Activities View -->
+            <div id="view-activities" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Recent Activities</h3>
+                <div class="glass-card">
+                    <ul id="activity-list" style="list-style: none;">
+                        <!-- Activities injected by JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="view-reports" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Performance Reports</h3>
+                <div class="stats-grid">
+                    <div class="glass-card"
+                        style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <div style="text-align: center;">
+                            <p style="font-size: 4rem; font-weight: bold; color: var(--primary-color);">85%</p>
+                            <p>Monthly Goal Reached</p>
+                        </div>
+                    </div>
+                    <div class="glass-card"
+                        style="height: 300px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 2rem; align-items: center; gap: 10px;">
+                        <div style="display: flex; align-items: flex-end; gap: 1rem; height: 200px;">
+                            <div
+                                style="width: 30px; height: 40%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 60%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 30%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 80%; background: var(--primary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 50%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                        </div>
+                        <p>Leads per Month</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile View -->
+            <div id="view-profile" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">My Profile</h3>
+                <div class="glass-card" style="max-width: 600px;">
+                    <form id="profile-details-form">
+                        <h4 style="margin-bottom: 1rem;">Profile Details</h4>
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="profile-name" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="profile-email" class="form-input">
+                        </div>
+                        <button type="submit" class="btn" style="margin-bottom: 2rem;">Update Details</button>
+                    </form>
+
+                    <form id="profile-password-form"
+                        style="border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">Change Password</h4>
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" id="current-password" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" id="new-password" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" id="confirm-password" class="form-input" required>
+                        </div>
+                        <button type="submit" class="btn"
+                            style="background: linear-gradient(135deg, var(--warning-color), #f97316);">Update
+                            Password</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="lead-modal" class="modal">
+        <div class="modal-content glass-card">
+            <button class="close-btn" id="close-modal-btn">&times;</button>
+            <h2 id="modal-title" style="margin-bottom: 1.5rem;">Add New Lead</h2>
+            <form id="lead-form">
+                <input type="hidden" id="lead-id">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="lead-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company</label>
+                    <input type="text" id="lead-company" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="lead-email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" id="lead-phone" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="lead-status" class="form-input">
+                        <option value="New">New</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Qualified">Qualified</option>
+                        <option value="Won">Won</option>
+                        <option value="Lost">Lost</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select id="lead-priority" class="form-input">
+                        <option value="Hot">Hot</option>
+                        <option value="Warm">Warm</option>
+                        <option value="Cold">Cold</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Save Lead</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
