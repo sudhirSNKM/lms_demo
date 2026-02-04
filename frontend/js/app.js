@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const viewElement = document.getElementById(`view-${targetView}`);
             if (viewElement) {
                 viewElement.style.display = 'block';
+
+                // Lazy load data
+                if (targetView === 'pipeline' && typeof renderPipeline === 'function') renderPipeline();
+                if (targetView === 'activities' && typeof loadActivities === 'function') loadActivities();
             }
         });
     });
@@ -291,34 +295,7 @@ window.onclick = (event) => {
     }
 };
 
-// Navigation Logic
-const navItems = document.querySelectorAll('.nav-item');
-const views = document.querySelectorAll('.view-section');
 
-navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-        if (item.id === 'logout-btn') return;
-
-        // Remove active class from all
-        navItems.forEach(nav => nav.classList.remove('active'));
-        // Add to clicked
-        item.classList.add('active');
-
-        // Hide all views
-        views.forEach(view => view.style.display = 'none');
-
-        // Show selected view
-        const viewName = item.textContent.trim().toLowerCase();
-        const targetView = document.getElementById(`view-${viewName === 'dashboard' ? 'dashboard' : viewName}`);
-
-        if (targetView) {
-            targetView.style.display = 'block';
-            // Refresh data if needed
-            if (viewName === 'pipeline') renderPipeline();
-            if (viewName === 'activities') loadActivities();
-        }
-    });
-});
 
 // Search Logic
 const searchInput = document.getElementById('search-leads');
