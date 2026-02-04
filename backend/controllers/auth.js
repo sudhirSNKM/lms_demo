@@ -42,7 +42,19 @@ exports.login = async (req, res, next) => {
             role: 'admin'
         };
 
-        sendTokenResponse(mockUser, 200, res);
+        // Use simple token instead of JWT for demo
+        const simpleToken = 'demo-token-' + Buffer.from(email).toString('base64');
+
+        res.status(200).json({
+            success: true,
+            token: simpleToken,
+            user: {
+                id: mockUser._id,
+                name: mockUser.name,
+                email: mockUser.email,
+                role: mockUser.role
+            }
+        });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
