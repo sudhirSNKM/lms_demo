@@ -33,19 +33,16 @@ exports.login = async (req, res, next) => {
     }
 
     try {
-        const user = await User.findOne({ email }).select('+password');
+        // Accept any credentials - no database check
+        // Create a mock user object
+        const mockUser = {
+            _id: 'demo-user-' + Date.now(),
+            name: email.split('@')[0] || 'Demo User',
+            email: email,
+            role: 'admin'
+        };
 
-        if (!user) {
-            return res.status(401).json({ success: false, error: 'Invalid credentials' });
-        }
-
-        const isMatch = await user.matchPassword(password);
-
-        if (!isMatch) {
-            return res.status(401).json({ success: false, error: 'Invalid credentials' });
-        }
-
-        sendTokenResponse(user, 200, res);
+        sendTokenResponse(mockUser, 200, res);
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
