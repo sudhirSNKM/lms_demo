@@ -27,12 +27,52 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('profile-email').value = user.email;
     }
 
+    // === NAVIGATION SYSTEM ===
+    const navItems = document.querySelectorAll('.nav-item[data-view]');
+    const views = document.querySelectorAll('.view-section');
+
+    navItems.forEach(nav => {
+        nav.addEventListener('click', () => {
+            const targetView = nav.getAttribute('data-view');
+
+            // Update active state
+            navItems.forEach(n => n.classList.remove('active'));
+            nav.classList.add('active');
+
+            // Show target view
+            views.forEach(v => v.style.display = 'none');
+            const viewElement = document.getElementById(`view-${targetView}`);
+            if (viewElement) {
+                viewElement.style.display = 'block';
+            }
+        });
+    });
+
+    // === THEME TOGGLE ===
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeText = document.getElementById('theme-text');
+    const body = document.body;
+
+    // Check saved theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        body.classList.add('light-mode');
+        themeText.textContent = 'Light Mode';
+        themeToggle.querySelector('.nav-icon').textContent = '☀️';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        body.classList.toggle('light-mode');
+        const isLight = body.classList.contains('light-mode');
+        themeText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+        themeToggle.querySelector('.nav-icon').textContent = isLight ? '☀️' : '🌙';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+
     // Header Profile Click
     document.querySelector('.user-profile').style.cursor = 'pointer';
     document.querySelector('.user-profile').addEventListener('click', () => {
         // Switch to profile view
-        const navItems = document.querySelectorAll('.nav-item');
-        const views = document.querySelectorAll('.view-section');
         navItems.forEach(nav => nav.classList.remove('active'));
         views.forEach(view => view.style.display = 'none');
         document.getElementById('view-profile').style.display = 'block';

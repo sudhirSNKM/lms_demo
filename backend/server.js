@@ -1,63 +1,131 @@
 const express = require('express');
-const dotenv = require('dotenv');
 const cors = require('cors');
-const mongoose = require('mongoose');
-
-// Load env vars
-dotenv.config();
-
-// Route files
-const auth = require('./routes/auth');
-const leads = require('./routes/leads');
-const activities = require('./routes/activities');
 
 const app = express();
 
-// Body parser
+// Middleware
 app.use(express.json());
-
-// Enable CORS
 app.use(cors());
 
-// Mount routers
-app.use('/api/auth', auth);
-app.use('/api/leads', leads);
-app.use('/api/activities', activities);
+// In-memory storage
+let leads = [];
+let activities = [];
 
-const connectDB = async () => {
-    // Check if we have a real MongoDB URI
-    if (process.env.MONGODB_URI) {
-        try {
-            console.log('Attempting to connect to Cloud MongoDB...');
-            const conn = await mongoose.connect(process.env.MONGODB_URI, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true
-            });
-            console.log(`MongoDB Cloud Connected: ${conn.connection.host}`);
-            return;
-        } catch (err) {
-            console.error(`Cloud MongoDB Error: ${err.message}. Falling back...`);
-        }
+// Helper to generate ID
+const generateId = () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+// ============ AUTH ROUTES ============
+app.post('/api/auth/login', (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ success: false, error: 'Please provide email and password' });
     }
 
-    // Fallback logic could be here, but we are restoring Mongoose.
-    // So we must exit if no DB.
-    console.error('No working MongoDB connection found. Please check .env MONGODB_URI');
-    process.exit(1); // Exit if no MongoDB connection
-}
+    // Accept any credentials
+    const token = 'demo-token-' + Buffer.from(email).toString('base64');
+    const user = {
+        id: generateId(),
+        name: email.split('@')[0] || 'Demo User',
+        email: email,
+        role: 'admin'
+    };
 
-connectDB();
+    res.json({ success: true, token, user });
+});
 
-const PORT = process.env.PORT || 5000;
+// ============ LEADS ROUTES ============
+app.get('/api/leads', (req, res) => {
+    res.json({ success: true, count: leads.length, data: leads });
+});
 
-const server = app.listen(
-    PORT,
-    console.log(`Server running on port ${PORT}`)
-);
+app.get('/api/leads/:id', (req, res) => {
+    const lead = leads.find(l => l._id === req.params.id);
+    if (!lead) {
+        return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+    res.json({ success: true, data: lead });
+});
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
-    console.log(`Error: ${err.message}`);
-    // Close server & exit process
-    server.close(() => process.exit(1));
+app.post('/api/leads', (req, res) => {
+    const lead = {
+        _id: generateId(),
+        ...req.body,
+        createdAt: new Date()
+    };
+    leads.push(lead);
+
+    activities.push({
+        _id: generateId(),
+        action: 'Create Lead',
+        description: `Created new lead: ${lead.name}`,
+        user: 'Demo User',
+        createdAt: new Date()
+    });
+
+    res.status(201).json({ success: true, data: lead });
+});
+
+app.put('/api/leads/:id', (req, res) => {
+    const index = leads.findIndex(l => l._id === req.params.id);
+    if (index === -1) {
+        return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+
+    leads[index] = { ...leads[index], ...req.body };
+
+    activities.push({
+        _id: generateId(),
+        action: 'Update Lead',
+        description: `Updated lead: ${leads[index].name}`,
+        user: 'Demo User',
+        createdAt: new Date()
+    });
+
+    res.json({ success: true, data: leads[index] });
+});
+
+app.delete('/api/leads/:id', (req, res) => {
+    const index = leads.findIndex(l => l._id === req.params.id);
+    if (index === -1) {
+        return res.status(404).json({ success: false, error: 'Lead not found' });
+    }
+
+    const deletedLead = leads[index];
+    leads.splice(index, 1);
+
+    activities.push({
+        _id: generateId(),
+        action: 'Delete Lead',
+        description: `Deleted lead: ${deletedLead.name}`,
+        user: 'Demo User',
+        createdAt: new Date()
+    });
+
+    res.json({ success: true, data: {} });
+});
+
+// ============ ACTIVITIES ROUTES ============
+app.get('/api/activities', (req, res) => {
+    const sortedActivities = activities.sort((a, b) =>
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    res.json({ success: true, count: sortedActivities.length, data: sortedActivities.slice(0, 50) });
+});
+
+// ============ AUTH MIDDLEWARE ROUTES ============
+app.put('/api/auth/updatedetails', (req, res) => {
+    const { name, email } = req.body;
+    res.json({ success: true, data: { name, email, role: 'admin' } });
+});
+
+app.put('/api/auth/updatepassword', (req, res) => {
+    res.json({ success: true, message: 'Password updated' });
+});
+
+// Start server
+const PORT = 5000;
+app.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`📊 Frontend: http://localhost:3000`);
 });

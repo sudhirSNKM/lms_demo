@@ -1,5 +1,4 @@
-// Use Netlify Functions for API calls
-const API_URL = '/api';
+const API_URL = 'http://localhost:5000/api';
 
 
 async function fetchAPI(endpoint, method = 'GET', body = null) {
