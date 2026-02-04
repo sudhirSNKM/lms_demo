@@ -81,181 +81,286 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load Data
     loadLeads();
 
-    // === NEW FEATURES ===
+    // === INIT ADVANCED FEATURES ===
+    initAdvancedFeatures();
+});
 
-    // 1. Export CSV
-    if (document.querySelector('.leads-section .section-header')) {
+function initAdvancedFeatures() {
+    // 1. Chat Simulation
+    const chatInput = document.querySelector('#view-multichannel input[type="text"]');
+    const sendBtn = document.querySelector('#view-multichannel .btn:last-child');
+    const chatWindow = document.querySelector('#view-multichannel .glass-card:last-child .conversation-item').parentElement.nextElementSibling.querySelector('div[style*="overflow-y: auto"]');
+
+    if (chatInput && chatWindow) {
+        const chatContainer = document.querySelector('#view-multichannel .glass-card:last-child');
+
+        // Helper to add message
+        const addMessage = (text, isUser = true) => {
+            const msgDiv = document.createElement('div');
+            msgDiv.style.marginBottom = '1rem';
+
+            const bubble = document.createElement('div');
+            bubble.style.padding = '0.75rem';
+            bubble.style.borderRadius = '12px';
+            bubble.style.maxWidth = '70%';
+            bubble.textContent = text;
+
+            if (isUser) {
+                bubble.style.background = 'rgba(99, 102, 241, 0.2)';
+                bubble.style.marginLeft = 'auto';
+                msgDiv.style.textAlign = 'right';
+            } else {
+                bubble.style.background = 'rgba(255, 255, 255, 0.1)';
+            }
+
+            const time = document.createElement('div');
+            time.style.fontSize = '0.75rem';
+            time.style.color = 'rgba(255,255,255,0.5)';
+            time.style.marginTop = '0.25rem';
+            time.textContent = 'Just now';
+
+            msgDiv.appendChild(bubble);
+            msgDiv.appendChild(time);
+            chatWindow.appendChild(msgDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        };
+
+        // Handle Send
+        const handleSend = () => {
+            const text = chatInput.value.trim();
+            if (text) {
+                addMessage(text, true);
+                chatInput.value = '';
+                // Simulate reply
+                setTimeout(() => {
+                    addMessage("Thanks for your message! Our team will get back to you shortly.", false);
+                }, 1500);
+            }
+        };
+
+        if (chatContainer.querySelector('.btn:last-of-type')) {
+            chatContainer.querySelector('.btn:last-of-type').onclick = handleSend;
+        }
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+    }
+
+    // 2. Integration Toggles
+    document.querySelectorAll('#view-multichannel .btn').forEach(btn => {
+        if (btn.textContent.includes('Connect LinkedIn')) {
+            btn.addEventListener('click', function () {
+                const isConnected = this.textContent.includes('Disconnect');
+                if (isConnected) {
+                    this.textContent = '🔗 Connect LinkedIn';
+                    this.style.background = 'linear-gradient(135deg, #0077b5, #00a0dc)';
+                    this.previousElementSibling.previousElementSibling.querySelector('div:last-child').innerHTML = '<span style="color: var(--warning-color);">● Pending</span>';
+                } else {
+                    this.textContent = '✓ Connected';
+                    this.style.background = 'var(--success-color)';
+                    this.previousElementSibling.previousElementSibling.querySelector('div:last-child').innerHTML = '<span style="color: var(--success-color);">● Connected</span>';
+                }
+            });
+        }
+    });
+
+    // 3. Settings Save
+    const saveLayoutBtn = document.querySelector('#view-settings button');
+    if (saveLayoutBtn) {
+        saveLayoutBtn.addEventListener('click', () => {
+            const originalText = saveLayoutBtn.innerHTML;
+            saveLayoutBtn.innerHTML = '✅ Saved!';
+            setTimeout(() => {
+                saveLayoutBtn.innerHTML = originalText;
+            }, 2000);
+        });
+    }
+
+    // 4. Export CSV
+    // Check if on dashboard view, or just add the listener if element exists
+    // Using a timeout to wait for initial render if needed, or just standard check
+    const headerDiv = document.querySelector('.leads-section .section-header > div');
+    if (headerDiv && !document.getElementById('export-btn')) {
         const btn = document.createElement('button');
+        btn.id = 'export-btn';
         btn.innerText = 'Export CSV';
         btn.className = 'add-btn';
         btn.style.background = 'var(--success-color)';
         btn.style.marginRight = '10px';
+
         btn.onclick = () => {
             const keys = ['name', 'company', 'email', 'phone', 'status', 'priority'];
             let csv = keys.join(',') + '\n';
-            globalLeads.forEach(row => {
-                csv += keys.map(k => row[k]).join(',') + '\n';
-            });
+
+            if (typeof globalLeads !== 'undefined') {
+                globalLeads.forEach(row => {
+                    csv += keys.map(k => row[k] || '').join(',') + '\n';
+                });
+            }
+
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'leads.csv';
+            a.download = 'leads_export.csv';
             a.click();
         };
-        document.querySelector('.leads-section .section-header > div').prepend(btn);
+
+        headerDiv.prepend(btn);
     }
+}
 
-    // Init Drag Logic (Call after render)
-    // ... logic inside renderPipeline
-
-
-    // Profile Forms Logic
-    const profileDetailsForm = document.getElementById('profile-details-form');
-    if (profileDetailsForm) {
-        profileDetailsForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('profile-name').value;
-            const email = document.getElementById('profile-email').value;
-
-            try {
-                const res = await fetchAPI('/auth/updatedetails', 'PUT', { name, email });
-                if (res.success) {
-                    localStorage.setItem('user', JSON.stringify(res.data));
-                    alert('Profile updated successfully!');
-                    window.location.reload();
-                }
-            } catch (err) {
-                alert(err.message);
-            }
-        });
-    }
-
-    const passwordForm = document.getElementById('profile-password-form');
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const currentPassword = document.getElementById('current-password').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (newPassword !== confirmPassword) {
-                alert('New passwords do not match');
-                return;
-            }
-
-            try {
-                await fetchAPI('/auth/updatepassword', 'PUT', { currentPassword, newPassword });
-                alert('Password updated successfully!');
-                passwordForm.reset();
-            } catch (err) {
-                alert(err.message);
-            }
-        });
-    }
+// Init Drag Logic (Call after render)
+// ... logic inside renderPipeline
 
 
-    // Logout logic
-    document.getElementById('logout-btn').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = 'index.html';
-    });
-
-    // Modal Logic
-    const modal = document.getElementById('lead-modal');
-    const openModalBtn = document.getElementById('open-modal-btn');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const leadForm = document.getElementById('lead-form');
-    const modalTitle = document.getElementById('modal-title');
-
-    openModalBtn.addEventListener('click', () => {
-        modalTitle.textContent = 'Add New Lead';
-        leadForm.reset();
-        document.getElementById('lead-id').value = '';
-        modal.classList.add('active');
-    });
-
-    closeModalBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-    });
-
-    window.onclick = (event) => {
-        if (event.target === modal) {
-            modal.classList.remove('active');
-        }
-    };
-
-    // Navigation Logic
-    const navItems = document.querySelectorAll('.nav-item');
-    const views = document.querySelectorAll('.view-section');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (item.id === 'logout-btn') return;
-
-            // Remove active class from all
-            navItems.forEach(nav => nav.classList.remove('active'));
-            // Add to clicked
-            item.classList.add('active');
-
-            // Hide all views
-            views.forEach(view => view.style.display = 'none');
-
-            // Show selected view
-            const viewName = item.textContent.trim().toLowerCase();
-            const targetView = document.getElementById(`view-${viewName === 'dashboard' ? 'dashboard' : viewName}`);
-
-            if (targetView) {
-                targetView.style.display = 'block';
-                // Refresh data if needed
-                if (viewName === 'pipeline') renderPipeline();
-                if (viewName === 'activities') loadActivities();
-            }
-        });
-    });
-
-    // Search Logic
-    const searchInput = document.getElementById('search-leads');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#leads-table-body tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
-            });
-        });
-    }
-
-    // Form Submit
-    leadForm.addEventListener('submit', async (e) => {
+// Profile Forms Logic
+const profileDetailsForm = document.getElementById('profile-details-form');
+if (profileDetailsForm) {
+    profileDetailsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        const id = document.getElementById('lead-id').value;
-        const leadData = {
-            name: document.getElementById('lead-name').value,
-            company: document.getElementById('lead-company').value,
-            email: document.getElementById('lead-email').value,
-            phone: document.getElementById('lead-phone').value,
-            status: document.getElementById('lead-status').value,
-            priority: document.getElementById('lead-priority').value
-        };
+        const name = document.getElementById('profile-name').value;
+        const email = document.getElementById('profile-email').value;
 
         try {
-            if (id) {
-                await fetchAPI(`/leads/${id}`, 'PUT', leadData);
-            } else {
-                await fetchAPI('/leads', 'POST', leadData);
+            const res = await fetchAPI('/auth/updatedetails', 'PUT', { name, email });
+            if (res.success) {
+                localStorage.setItem('user', JSON.stringify(res.data));
+                alert('Profile updated successfully!');
+                window.location.reload();
             }
-            modal.classList.remove('active');
-            loadLeads();
-            renderPipeline();
         } catch (err) {
             alert(err.message);
         }
     });
+}
+
+const passwordForm = document.getElementById('profile-password-form');
+if (passwordForm) {
+    passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (newPassword !== confirmPassword) {
+            alert('New passwords do not match');
+            return;
+        }
+
+        try {
+            await fetchAPI('/auth/updatepassword', 'PUT', { currentPassword, newPassword });
+            alert('Password updated successfully!');
+            passwordForm.reset();
+        } catch (err) {
+            alert(err.message);
+        }
+    });
+}
+
+
+// Logout logic
+document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+});
+
+// Modal Logic
+const modal = document.getElementById('lead-modal');
+const openModalBtn = document.getElementById('open-modal-btn');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const leadForm = document.getElementById('lead-form');
+const modalTitle = document.getElementById('modal-title');
+
+openModalBtn.addEventListener('click', () => {
+    modalTitle.textContent = 'Add New Lead';
+    leadForm.reset();
+    document.getElementById('lead-id').value = '';
+    modal.classList.add('active');
+});
+
+closeModalBtn.addEventListener('click', () => {
+    modal.classList.remove('active');
+});
+
+window.onclick = (event) => {
+    if (event.target === modal) {
+        modal.classList.remove('active');
+    }
+};
+
+// Navigation Logic
+const navItems = document.querySelectorAll('.nav-item');
+const views = document.querySelectorAll('.view-section');
+
+navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        if (item.id === 'logout-btn') return;
+
+        // Remove active class from all
+        navItems.forEach(nav => nav.classList.remove('active'));
+        // Add to clicked
+        item.classList.add('active');
+
+        // Hide all views
+        views.forEach(view => view.style.display = 'none');
+
+        // Show selected view
+        const viewName = item.textContent.trim().toLowerCase();
+        const targetView = document.getElementById(`view-${viewName === 'dashboard' ? 'dashboard' : viewName}`);
+
+        if (targetView) {
+            targetView.style.display = 'block';
+            // Refresh data if needed
+            if (viewName === 'pipeline') renderPipeline();
+            if (viewName === 'activities') loadActivities();
+        }
+    });
+});
+
+// Search Logic
+const searchInput = document.getElementById('search-leads');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#leads-table-body tr');
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+        });
+    });
+}
+
+// Form Submit
+leadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('lead-id').value;
+    const leadData = {
+        name: document.getElementById('lead-name').value,
+        company: document.getElementById('lead-company').value,
+        email: document.getElementById('lead-email').value,
+        phone: document.getElementById('lead-phone').value,
+        status: document.getElementById('lead-status').value,
+        priority: document.getElementById('lead-priority').value
+    };
+
+    try {
+        if (id) {
+            await fetchAPI(`/leads/${id}`, 'PUT', leadData);
+        } else {
+            await fetchAPI('/leads', 'POST', leadData);
+        }
+        modal.classList.remove('active');
+        loadLeads();
+        renderPipeline();
+    } catch (err) {
+        alert(err.message);
+    }
+});
 });
 
 let globalLeads = [];
