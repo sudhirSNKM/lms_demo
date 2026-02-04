@@ -1,9 +1,22 @@
-const Collection = require('../utils/jsonDb');
+const mongoose = require('mongoose');
 
-class ActivityCollection extends Collection {
-    constructor() {
-        super('activities');
+const ActivitySchema = new mongoose.Schema({
+    action: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    user: {
+        type: String,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-}
+});
 
-module.exports = new ActivityCollection();
+module.exports = mongoose.model('Activity', ActivitySchema);

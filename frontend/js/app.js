@@ -1,73 +1,65 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-Login / Auth Check
-    const checkAuth = async () => {
-        let token = localStorage.getItem('token');
-        let user = JSON.parse(localStorage.getItem('user'));
+    // Auth Check
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
 
-        if (!token || !user) {
-            console.log('No session found. Auto-logging in as Admin...');
-            try {
-                // Hardcoded Admin Creds for Auto-Login
-                const res = await fetch('http://localhost:5000/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: 'admin@ace.com', password: 'password123' })
-                });
+    if (!token || !user) {
+        window.location.href = 'index.html';
+        return;
+    }
 
-                const data = await res.json();
+    // Set User Info UI
+    document.getElementById('user-name').textContent = user.name;
+    document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
 
-                if (data.success) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    token = data.token;
-                    user = data.user;
-                } else {
-                    throw new Error('Auto-login failed');
-                }
-            } catch (err) {
-                console.error(err);
-                if (window.location.protocol === 'https:') {
-                    alert('Demo Error: Cannot connect to Localhost from https://vercel.app (Mixed Content).\nPlease run this project LOCALLY.');
-                } else {
-                    alert('Backend is offline. Please run "npm run dev" in the backend folder.');
-                }
-                return;
-            }
-        }
-
-        // Set User Info UI
-        if (user) {
-            document.getElementById('user-name').textContent = user.name;
-            document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
-
-            // Profile Init
-            if (document.getElementById('profile-name')) {
-                document.getElementById('profile-name').value = user.name;
-                document.getElementById('profile-email').value = user.email;
-            }
-        }
-
-        // Load Data
-        loadLeads();
-        if (document.getElementById('view-activities') && document.getElementById('view-activities').style.display !== 'none') {
-            loadActivities();
-        }
-    };
-
-    checkAuth();
+    // Profile Init
+    if (document.getElementById('profile-name')) {
+        document.getElementById('profile-name').value = user.name;
+        document.getElementById('profile-email').value = user.email;
+    }
 
     // Header Profile Click
     document.querySelector('.user-profile').style.cursor = 'pointer';
     document.querySelector('.user-profile').addEventListener('click', () => {
-        // Switch to profile view manually
+        // Switch to profile view
         const navItems = document.querySelectorAll('.nav-item');
         const views = document.querySelectorAll('.view-section');
-
         navItems.forEach(nav => nav.classList.remove('active'));
         views.forEach(view => view.style.display = 'none');
-
         document.getElementById('view-profile').style.display = 'block';
     });
+
+    // Load Data
+    loadLeads();
+
+    // === NEW FEATURES ===
+
+    // 1. Export CSV
+    if (document.querySelector('.leads-section .section-header')) {
+        const btn = document.createElement('button');
+        btn.innerText = 'Export CSV';
+        btn.className = 'add-btn';
+        btn.style.background = 'var(--success-color)';
+        btn.style.marginRight = '10px';
+        btn.onclick = () => {
+            const keys = ['name', 'company', 'email', 'phone', 'status', 'priority'];
+            let csv = keys.join(',') + '\n';
+            globalLeads.forEach(row => {
+                csv += keys.map(k => row[k]).join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'leads.csv';
+            a.click();
+        };
+        document.querySelector('.leads-section .section-header > div').prepend(btn);
+    }
+
+    // Init Drag Logic (Call after render)
+    // ... logic inside renderPipeline
+
 
     // Profile Forms Logic
     const profileDetailsForm = document.getElementById('profile-details-form');
@@ -332,27 +324,90 @@ function renderPipeline() {
         col.style.padding = '1rem';
         col.style.border = '1px solid var(--glass-border)';
 
-        let cardsHtml = '';
-        stageLeads.forEach(lead => {
-            cardsHtml += `
-                <div class="glass-card" style="margin-bottom: 0.5rem; padding: 1rem; cursor: pointer;" onclick="editLead('${lead._id}')">
-                    <div style="font-weight: bold; margin-bottom: 0.25rem;">${lead.name}</div>
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;">${lead.company}</div>
-                    <span class="priority-${lead.priority.toLowerCase()}" style="font-size: 0.75rem;">${lead.priority}</span>
-                </div>
-             `;
-        });
+        // Drag Drop Attributes
+        col.setAttribute('data-stage', stage);
+        col.addEventListener('dragover', e => e.preventDefault());
+        col.addEventListener('drop', handleDrop);
+
+        // Let's build the innerHTML with ondragstart
+        const cards = stageLeads.map(lead => `
+            <div class="glass-card" draggable="true" ondragstart="handleDragStart(event, '${lead._id}')" style="margin-bottom: 0.5rem; padding: 1rem; cursor: grab; position: relative;" onclick="editLead('${lead._id}')">
+                 <div style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: var(--primary-color);" onclick="event.stopPropagation(); generateEmail('${lead.name}', '${lead.status}')" title="AI Email Draft">✨</div>
+                <div style="font-weight: bold; margin-bottom: 0.25rem;">${lead.name}</div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem;">${lead.company}</div>
+                <span class="priority-${lead.priority.toLowerCase()}" style="font-size: 0.75rem;">${lead.priority}</span>
+            </div>
+        `).join('');
 
         col.innerHTML = `
             <h4 style="margin-bottom: 1rem; color: var(--primary-color); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">${stage} (${stageLeads.length})</h4>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                ${cardsHtml}
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; min-height: 200px;">
+                ${cards}
             </div>
         `;
 
         container.appendChild(col);
     });
 }
+
+// Drag & Drop Handlers
+let draggedLeadId = null;
+
+window.handleDragStart = (e, id) => {
+    draggedLeadId = id;
+    e.dataTransfer.effectAllowed = 'move';
+};
+
+window.handleDrop = async (e) => {
+    e.preventDefault();
+    const stage = e.currentTarget.getAttribute('data-stage');
+    if (!draggedLeadId || !stage) return;
+
+    // Find lead
+    const lead = globalLeads.find(l => l._id === draggedLeadId);
+    if (lead && lead.status !== stage) {
+        // Optimistic UI Update
+        lead.status = stage;
+        renderPipeline();
+        renderTable(globalLeads); // update table too if consistent
+
+        try {
+            await fetchAPI(`/leads/${draggedLeadId}`, 'PUT', { status: stage });
+            // Add activity log manually or rely on backend
+        } catch (err) {
+            console.error(err);
+            alert('Failed to move lead');
+            loadLeads(); // revert
+        }
+    }
+    draggedLeadId = null;
+};
+
+// AI Email Feature
+window.generateEmail = (name, status) => {
+    let subject = '';
+    let body = '';
+
+    if (status === 'New') {
+        subject = `Introduction: AI Solutions for ${name}`;
+        body = `Hi ${name},\n\nI noticed your company is looking for innovative solutions. We specialize in AI-driven tools that can scale your operations.\n\nAre you available for a quick chat this week?\n\nBest,\nACE Team`;
+    } else if (status === 'Qualified') {
+        subject = `Next Steps for ${name}`;
+        body = `Hi ${name},\n\nIt was great speaking with you. Based on our requirements, I believe we are a perfect match.\n\nI've attached the proposal. Let me know what you think.\n\nBest,\nACE Team`;
+    } else if (status === 'Won') {
+        subject = `Welcome to ACE!`;
+        body = `Hi ${name},\n\nThrilled to have you on board! Let's get started on the onboarding process.\n\nCheers!`;
+    } else {
+        subject = `Checking in - ${name}`;
+        body = `Hi ${name},\n\nJust wanted to circle back and see if you had any thoughts on our previous conversation.\n\nBest,\nACE Team`;
+    }
+
+    const text = `Subject: ${subject}\n\n${body}`;
+    navigator.clipboard.writeText(text).then(() => {
+        alert('✨ AI Email Draft copied to clipboard!\n\n' + text);
+    });
+};
+
 
 window.editLead = async (id) => {
     try {

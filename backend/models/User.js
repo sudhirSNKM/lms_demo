@@ -1,33 +1,43 @@
-const Collection = require('../utils/jsonDb');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-class UserCollection extends Collection {
-  constructor() {
-    super('users');
+const UserSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'manager', 'sales'],
+    default: 'sales'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
+});
 
-  async create(doc) {
-    // Hash password before saving
-    const salt = await bcrypt.genSalt(10);
-    doc.password = await bcrypt.hash(doc.password, salt);
-    return super.create(doc);
+// Encrypt password using bcrypt
+UserSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next();
   }
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
-  attachMethods(item) {
-    const doc = super.attachMethods(item);
-    doc.matchPassword = async function (enteredPassword) {
-      return await bcrypt.compare(enteredPassword, this.password);
-    };
-    return doc;
-  }
+// Match user entered password to hashed password in database
+UserSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
-  // Quick hack for chainable .select()
-  findOne(query) {
-    const self = this;
-    const promise = super.findOne(query);
-    promise.select = function () { return this; }; // Return the promise itself
-    return promise;
-  }
-}
-
-module.exports = new UserCollection();
+module.exports = mongoose.model('User', UserSchema);
