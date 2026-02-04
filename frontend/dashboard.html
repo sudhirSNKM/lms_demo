@@ -10,7 +10,749 @@
 </head>
 
 <body>
-    <!-- ... body content ... -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar glass">
+            <div class="sidebar-title">ACE LEADS</div>
+            <nav>
+                <div class="nav-item active" data-view="dashboard">
+                    <span class="nav-icon">📊</span> Dashboard
+                </div>
+                <div class="nav-item" data-view="pipeline">
+                    <span class="nav-icon">🔄</span> Pipeline
+                </div>
+                <div class="nav-item" data-view="analytics">
+                    <span class="nav-icon">📈</span> Analytics
+                </div>
+                <div class="nav-item" data-view="multichannel">
+                    <span class="nav-icon">📩</span> Multi-Channel
+                </div>
+                <div class="nav-item" data-view="activities">
+                    <span class="nav-icon">📝</span> Activities
+                </div>
+                <div class="nav-item" data-view="reports">
+                    <span class="nav-icon">📑</span> Reports
+                </div>
+                <div class="nav-item" data-view="settings">
+                    <span class="nav-icon">⚙️</span> Settings
+                </div>
+                <div id="theme-toggle" class="nav-item" style="margin-top: auto;">
+                    <span class="nav-icon">🌙</span> <span id="theme-text">Dark Mode</span>
+                </div>
+                <div id="logout-btn" class="nav-item" style="color: var(--danger-color);">
+                    <span class="nav-icon">🚪</span> Logout
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h2>Dashboard Overview</h2>
+                <div class="user-profile">
+                    <span id="user-name">Loading...</span>
+                    <div class="avatar" id="user-avatar">A</div>
+                </div>
+            </header>
+
+            <!-- Leads Management (Default View) -->
+            <div id="view-dashboard" class="view-section">
+                <!-- KPI Cards -->
+                <div class="stats-grid">
+                    <div class="glass-card">
+                        <div class="stat-label">Total Leads</div>
+                        <div class="stat-value" id="total-leads" style="color: var(--primary-color)">0</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">New Leads</div>
+                        <div class="stat-value" id="new-leads" style="color: #60a5fa">0</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Hot Leads</div>
+                        <div class="stat-value" id="hot-leads" style="color: var(--danger-color)">0</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Conversion Rate</div>
+                        <div class="stat-value" style="color: var(--success-color)">12.5%</div>
+                    </div>
+                </div>
+
+                <div class="leads-section glass-card">
+                    <div class="section-header">
+                        <h3>Leads Directory</h3>
+                        <div style="display: flex; gap: 1rem;">
+                            <input type="text" id="search-leads" placeholder="Search leads..." class="form-input"
+                                style="width: 200px; padding: 0.5rem;">
+                            <button class="add-btn" id="open-modal-btn">+ New Lead</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>AI Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-table-body">
+                            <!-- Leads will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pipeline View -->
+            <div id="view-pipeline" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Lead Pipeline</h3>
+                <div class="pipeline-container"
+                    style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem;">
+                    <!-- Pipeline Columns injected by JS -->
+                </div>
+            </div>
+
+            <!-- Activities View -->
+            <div id="view-activities" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Recent Activities</h3>
+                <div class="glass-card">
+                    <ul id="activity-list" style="list-style: none;">
+                        <!-- Activities injected by JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="view-reports" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">Performance Reports</h3>
+                <div class="stats-grid">
+                    <div class="glass-card"
+                        style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <div style="text-align: center;">
+                            <p style="font-size: 4rem; font-weight: bold; color: var(--primary-color);">85%</p>
+                            <p>Monthly Goal Reached</p>
+                        </div>
+                    </div>
+                    <div class="glass-card"
+                        style="height: 300px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 2rem; align-items: center; gap: 10px;">
+                        <div style="display: flex; align-items: flex-end; gap: 1rem; height: 200px;">
+                            <div
+                                style="width: 30px; height: 40%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 60%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 30%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 80%; background: var(--primary-color); border-radius: 4px;">
+                            </div>
+                            <div
+                                style="width: 30px; height: 50%; background: var(--secondary-color); border-radius: 4px;">
+                            </div>
+                        </div>
+                        <p>Leads per Month</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile View -->
+            <div id="view-profile" class="view-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem;">My Profile</h3>
+                <div class="glass-card" style="max-width: 600px;">
+                    <form id="profile-details-form">
+                        <h4 style="margin-bottom: 1rem;">Profile Details</h4>
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="profile-name" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="profile-email" class="form-input">
+                        </div>
+                        <button type="submit" class="btn" style="margin-bottom: 2rem;">Update Details</button>
+                    </form>
+
+                    <form id="profile-password-form"
+                        style="border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                        <h4 style="margin-bottom: 1rem;">Change Password</h4>
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" id="current-password" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" id="new-password" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" id="confirm-password" class="form-input" required>
+                        </div>
+                        <button type="submit" class="btn"
+                            style="background: linear-gradient(135deg, var(--warning-color), #f97316);">Update
+                            Password</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="view-analytics" class="view-section" style="display: none;">
+                <h2 style="margin-bottom: 2rem;">📈 Analytics & Reporting</h2>
+
+                <!-- Performance KPIs -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="glass-card">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value" style="color: var(--success-color)">$125,430</div>
+                        <div style="font-size: 0.875rem; color: #10b981; margin-top: 0.5rem;">↑ 23% vs last month</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Conversion Rate</div>
+                        <div class="stat-value" style="color: var(--primary-color)">18.5%</div>
+                        <div style="font-size: 0.875rem; color: #10b981; margin-top: 0.5rem;">↑ 5.2% improvement</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Avg. Deal Size</div>
+                        <div class="stat-value" style="color: #60a5fa">$4,250</div>
+                        <div style="font-size: 0.875rem; color: #ef4444; margin-top: 0.5rem;">↓ 2% vs last month</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">Sales Cycle</div>
+                        <div class="stat-value" style="color: var(--warning-color)">14 days</div>
+                        <div style="font-size: 0.875rem; color: #10b981; margin-top: 0.5rem;">↓ 3 days faster</div>
+                    </div>
+                </div>
+
+                <!-- Conversion Funnel -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;">🔄 Conversion Funnel</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="funnel-stage">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Total Leads</span>
+                                <span style="font-weight: 600;">1,250 (100%)</span>
+                            </div>
+                            <div
+                                style="background: rgba(99, 102, 241, 0.1); height: 40px; border-radius: 8px; position: relative; overflow: hidden;">
+                                <div
+                                    style="background: linear-gradient(90deg, #6366f1, #8b5cf6); height: 100%; width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="funnel-stage">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Contacted</span>
+                                <span style="font-weight: 600;">875 (70%)</span>
+                            </div>
+                            <div
+                                style="background: rgba(99, 102, 241, 0.1); height: 40px; border-radius: 8px; position: relative; overflow: hidden;">
+                                <div
+                                    style="background: linear-gradient(90deg, #8b5cf6, #a78bfa); height: 100%; width: 70%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="funnel-stage">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Qualified</span>
+                                <span style="font-weight: 600;">425 (34%)</span>
+                            </div>
+                            <div
+                                style="background: rgba(99, 102, 241, 0.1); height: 40px; border-radius: 8px; position: relative; overflow: hidden;">
+                                <div
+                                    style="background: linear-gradient(90deg, #a78bfa, #c4b5fd); height: 100%; width: 34%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="funnel-stage">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Won</span>
+                                <span style="font-weight: 600; color: var(--success-color);">231 (18.5%)</span>
+                            </div>
+                            <div
+                                style="background: rgba(16, 185, 129, 0.1); height: 40px; border-radius: 8px; position: relative; overflow: hidden;">
+                                <div
+                                    style="background: linear-gradient(90deg, #10b981, #34d399); height: 100%; width: 18.5%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top: 1.5rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid var(--danger-color);">
+                        <strong>⚠️ Drop-off Alert:</strong> 51% drop between Contacted → Qualified. Consider improving
+                        qualification process.
+                    </div>
+                </div>
+
+                <!-- Sales Performance by Executive -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;">👥 Sales Performance by Executive</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Executive</th>
+                                <th>Leads</th>
+                                <th>Conversions</th>
+                                <th>Rate</th>
+                                <th>Revenue</th>
+                                <th>Avg Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sarah Johnson</strong></td>
+                                <td>145</td>
+                                <td>42</td>
+                                <td><span style="color: var(--success-color);">29%</span></td>
+                                <td>$52,400</td>
+                                <td>2.3 hrs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mike Chen</strong></td>
+                                <td>132</td>
+                                <td>35</td>
+                                <td><span style="color: var(--success-color);">26.5%</span></td>
+                                <td>$48,200</td>
+                                <td>3.1 hrs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Emily Davis</strong></td>
+                                <td>128</td>
+                                <td>28</td>
+                                <td><span style="color: var(--warning-color);">21.9%</span></td>
+                                <td>$39,800</td>
+                                <td>4.5 hrs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>James Wilson</strong></td>
+                                <td>98</td>
+                                <td>15</td>
+                                <td><span style="color: var(--danger-color);">15.3%</span></td>
+                                <td>$22,100</td>
+                                <td>6.2 hrs</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Custom Report Builder -->
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1.5rem;">📑 Custom Report Builder</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Date Range</label>
+                            <select class="form-input">
+                                <option>Last 7 Days</option>
+                                <option>Last 30 Days</option>
+                                <option selected>Last 90 Days</option>
+                                <option>Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Group By</label>
+                            <select class="form-input">
+                                <option>Lead Source</option>
+                                <option selected>Sales Executive</option>
+                                <option>Lead Status</option>
+                                <option>Industry</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Metrics</label>
+                            <select class="form-input">
+                                <option selected>All Metrics</option>
+                                <option>Revenue Only</option>
+                                <option>Conversion Rate</option>
+                                <option>Response Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                            📊 Generate Report
+                        </button>
+                        <button class="btn" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                            📄 Export to PDF
+                        </button>
+                        <button class="btn" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            📗 Export to Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Channel View -->
+            <div id="view-multichannel" class="view-section" style="display: none;">
+                <h2 style="margin-bottom: 2rem;">📩 Multi-Channel Lead Capture</h2>
+
+                <!-- Channel Overview -->
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="glass-card">
+                        <div class="stat-label">📧 Email Leads</div>
+                        <div class="stat-value" style="color: #3b82f6">342</div>
+                        <div style="font-size: 0.875rem; margin-top: 0.5rem;">27% of total</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">💬 WhatsApp Leads</div>
+                        <div class="stat-value" style="color: #10b981">218</div>
+                        <div style="font-size: 0.875rem; margin-top: 0.5rem;">17% of total</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">🌐 Website Forms</div>
+                        <div class="stat-value" style="color: var(--primary-color)">456</div>
+                        <div style="font-size: 0.875rem; margin-top: 0.5rem;">36% of total</div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="stat-label">📱 Social Media</div>
+                        <div class="stat-value" style="color: #f59e0b">234</div>
+                        <div style="font-size: 0.875rem; margin-top: 0.5rem;">20% of total</div>
+                    </div>
+                </div>
+
+                <!-- Integration Cards -->
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Email Integration -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 2.5rem;">📧</div>
+                            <div>
+                                <h3 style="margin: 0;">Email Integration</h3>
+                                <div style="font-size: 0.875rem; color: var(--success-color);">● Connected</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            Gmail & Outlook integrated. Auto-capture leads from inbox.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">⚙️ Configure</button>
+                            <button class="btn" style="flex: 1; padding: 0.5rem; background: rgba(239, 68, 68, 0.2);">🔌
+                                Disconnect</button>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Integration -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 2.5rem;">💬</div>
+                            <div>
+                                <h3 style="margin: 0;">WhatsApp Business</h3>
+                                <div style="font-size: 0.875rem; color: var(--success-color);">● Connected</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            WhatsApp API integrated. Receive & respond to messages.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">💬 Open Chat</button>
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">⚙️ Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- LinkedIn Integration -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 2.5rem;">💼</div>
+                            <div>
+                                <h3 style="margin: 0;">LinkedIn</h3>
+                                <div style="font-size: 0.875rem; color: var(--warning-color);">● Pending</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            Connect LinkedIn to import leads from InMail & connections.
+                        </p>
+                        <button class="btn"
+                            style="width: 100%; padding: 0.5rem; background: linear-gradient(135deg, #0077b5, #00a0dc);">
+                            🔗 Connect LinkedIn
+                        </button>
+                    </div>
+
+                    <!-- Facebook Integration -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 2.5rem;">📘</div>
+                            <div>
+                                <h3 style="margin: 0;">Facebook Ads</h3>
+                                <div style="font-size: 0.875rem; color: var(--success-color);">● Connected</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            Auto-import leads from Facebook Lead Ads campaigns.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">📊 View Campaigns</button>
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">⚙️ Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- Website Forms -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 2.5rem;">🌐</div>
+                            <div>
+                                <h3 style="margin: 0;">Website Forms</h3>
+                                <div style="font-size: 0.875rem; color: var(--success-color);">● Active</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            Embed forms on your website. Auto-capture submissions.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">📝 Create Form</button>
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">🔗 Get Embed Code</button>
+                        </div>
+                    </div>
+
+                    <!-- Chatbot Integration -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 2.5rem;">🤖</div>
+                            <div>
+                                <h3 style="margin: 0;">AI Chatbot</h3>
+                                <div style="font-size: 0.875rem; color: var(--success-color);">● Active</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem;">
+                            24/7 AI chatbot to qualify leads automatically.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">🎯 Train Bot</button>
+                            <button class="btn" style="flex: 1; padding: 0.5rem;">📊 Analytics</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Communication Hub -->
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1.5rem;">💬 Communication Hub</h3>
+                    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; height: 500px;">
+                        <!-- Conversation List -->
+                        <div
+                            style="border-right: 1px solid rgba(255,255,255,0.1); padding-right: 1rem; overflow-y: auto;">
+                            <input type="text" placeholder="Search conversations..." class="form-input"
+                                style="margin-bottom: 1rem;">
+                            <div class="conversation-item"
+                                style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong>John Doe</strong>
+                                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">2m ago</span>
+                                </div>
+                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.7);">💬 WhatsApp: Interested
+                                    in pricing...</div>
+                            </div>
+                            <div class="conversation-item"
+                                style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong>Sarah Smith</strong>
+                                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">15m ago</span>
+                                </div>
+                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.7);">📧 Email: Follow-up on
+                                    demo request</div>
+                            </div>
+                            <div class="conversation-item"
+                                style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong>Mike Johnson</strong>
+                                    <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">1h ago</span>
+                                </div>
+                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.7);">💼 LinkedIn: Connection
+                                    request</div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Window -->
+                        <div style="display: flex; flex-direction: column;">
+                            <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <strong>John Doe</strong>
+                                <div style="font-size: 0.875rem; color: rgba(255,255,255,0.5);">via WhatsApp • Online
+                                </div>
+                            </div>
+                            <div style="flex: 1; padding: 1rem; overflow-y: auto; background: rgba(0,0,0,0.2);">
+                                <div style="margin-bottom: 1rem;">
+                                    <div
+                                        style="background: rgba(99, 102, 241, 0.2); padding: 0.75rem; border-radius: 12px; max-width: 70%; margin-left: auto;">
+                                        Hi John! Thanks for reaching out. How can I help you today?
+                                    </div>
+                                    <div
+                                        style="text-align: right; font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">
+                                        10:45 AM</div>
+                                </div>
+                                <div style="margin-bottom: 1rem;">
+                                    <div
+                                        style="background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 12px; max-width: 70%;">
+                                        I'm interested in your enterprise plan. Can you share pricing details?
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.25rem;">
+                                        10:47 AM</div>
+                                </div>
+                            </div>
+                            <div
+                                style="padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 0.5rem;">
+                                <input type="text" placeholder="Type a message..." class="form-input" style="flex: 1;">
+                                <button class="btn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings View (Dark Mode & Customization) -->
+            <div id="view-settings" class="view-section" style="display: none;">
+                <h2 style="margin-bottom: 2rem;">⚙️ Settings & Customization</h2>
+
+                <!-- Theme Settings -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;">🎨 Appearance</h3>
+                    <div class="form-group">
+                        <label class="form-label">Theme Mode</label>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn" id="theme-light" style="flex: 1;">☀️ Light Mode</button>
+                            <button class="btn" id="theme-dark"
+                                style="flex: 1; background: linear-gradient(135deg, #1e293b, #334155);">🌙 Dark
+                                Mode</button>
+                            <button class="btn" id="theme-auto" style="flex: 1;">🔄 Auto (System)</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label class="form-label">Accent Color</label>
+                        <div style="display: flex; gap: 1rem;">
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 8px; cursor: pointer; border: 3px solid rgba(99, 102, 241, 0.5);">
+                            </div>
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #34d399); border-radius: 8px; cursor: pointer;">
+                            </div>
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #f59e0b, #fbbf24); border-radius: 8px; cursor: pointer;">
+                            </div>
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #ef4444, #f87171); border-radius: 8px; cursor: pointer;">
+                            </div>
+                            <div
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #3b82f6, #60a5fa); border-radius: 8px; cursor: pointer;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Customization -->
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem;">🧩 Custom Dashboard Layout</h3>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                        Drag and drop widgets to customize your dashboard layout. Changes are saved automatically.
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="glass-card"
+                            style="padding: 1rem; cursor: move; border: 2px dashed rgba(99, 102, 241, 0.3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>📊 KPI Cards</span>
+                                <input type="checkbox" checked>
+                            </div>
+                        </div>
+                        <div class="glass-card"
+                            style="padding: 1rem; cursor: move; border: 2px dashed rgba(99, 102, 241, 0.3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>📈 Revenue Chart</span>
+                                <input type="checkbox" checked>
+                            </div>
+                        </div>
+                        <div class="glass-card"
+                            style="padding: 1rem; cursor: move; border: 2px dashed rgba(99, 102, 241, 0.3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>🔔 Notifications</span>
+                                <input type="checkbox">
+                            </div>
+                        </div>
+                        <div class="glass-card"
+                            style="padding: 1rem; cursor: move; border: 2px dashed rgba(99, 102, 241, 0.3);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>📝 Recent Activities</span>
+                                <input type="checkbox" checked>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn"
+                        style="margin-top: 1.5rem; background: linear-gradient(135deg, #10b981, #34d399);">
+                        💾 Save Layout
+                    </button>
+                </div>
+
+                <!-- 3D Effects -->
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1.5rem;">✨ Visual Effects</h3>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" checked> Enable 3D Card Tilt Effects
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" checked> Enable Animated Backgrounds
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" checked> Enable Smooth Transitions
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox"> Enable Particle Effects
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="lead-modal" class="modal">
+        <div class="modal-content glass-card">
+            <button class="close-btn" id="close-modal-btn">&times;</button>
+            <h2 id="modal-title" style="margin-bottom: 1.5rem;">Add New Lead</h2>
+            <form id="lead-form">
+                <input type="hidden" id="lead-id">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="lead-name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company</label>
+                    <input type="text" id="lead-company" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="lead-email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" id="lead-phone" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="lead-status" class="form-input">
+                        <option value="New">New</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Qualified">Qualified</option>
+                        <option value="Won">Won</option>
+                        <option value="Lost">Lost</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select id="lead-priority" class="form-input">
+                        <option value="Hot">Hot</option>
+                        <option value="Warm">Warm</option>
+                        <option value="Cold">Cold</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Save Lead</button>
+            </form>
+        </div>
+    </div>
+
     <script src="js/api.js?v=2"></script>
     <script src="js/app.js?v=2"></script>
 </body>
