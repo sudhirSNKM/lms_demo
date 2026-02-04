@@ -1,6 +1,4 @@
-// Detect if we are on localhost or deployment
-const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_URL = isLocal ? 'http://localhost:5000/api' : 'https://lms-demo-ivl5.onrender.com/api';
+const API_URL = 'http://localhost:5000/api';
 
 if (!isLocal && API_URL.includes('your-backend-url')) {
     console.warn('WARNING: You are on a deployed site but the Backend URL is not set. Login will likely fail.');
