@@ -134,6 +134,7 @@ body {
   padding: 2rem;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .sidebar-title {
